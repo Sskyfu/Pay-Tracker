@@ -32,14 +32,15 @@ class App(customtkinter.CTk):
         self.pay_adv = round(self.pay_adv / self.day_count, 2)
 
         self.title("Pay Tracker")
-        self.geometry("700x700")
+        self.geometry("900x900")
         self.grid_columnconfigure(0, weight=1)
         self.app_title = customtkinter.CTkLabel(self, text="Pay Tracking App", font=('Arial', 25))
         self.app_title.grid(row=0, column=0, padx=20, pady=20, sticky="ew")
-        self.adv_pay_ui = customtkinter.CTkLabel(self, text=str(self.pay_adv), font=('Arial', 25))
+        self.adv_pay_ui = customtkinter.CTkLabel(self, text="Advrage pay: $" + str(self.pay_adv), font=('Arial', 25))
         self.adv_pay_ui.grid(row=1, column=0, sticky="ew")
 
         #graph
+        # TODO: factor in if the same day was 2 or more entries
 
         dataset = {'Day': [], 'Earnings': []}
         for day in self.pay_data:
@@ -47,10 +48,23 @@ class App(customtkinter.CTk):
                 dataset['Day'].append(day['Date '])
                 number = day['Hourly'].replace('$', '')
                 dataset['Earnings'].append(float(number))
+        days = []
+        earnings = []
         #print(dataset)
-
+        # cut out the last 14 days
         days = dataset['Day']
         earnings = dataset['Earnings']
+        if len(days) > 14:
+            days = days[-14:]
+            earnings = earnings[-14:]
+
+        i = 0
+        while i < 14:
+            temp = days[i]
+            days[i] = temp[:-5]
+            i += 1
+
+
 
         figure = plt.Figure(figsize=(6, 4), dpi=100)
 
@@ -60,8 +74,8 @@ class App(customtkinter.CTk):
         axes = figure.add_subplot()
 
         axes.bar(days, earnings)
-        axes.set_title('Earnings')
-        axes.set_ylabel('$')
+        axes.set_title('Hourly Earnings Last 14 Days')
+        axes.set_ylabel('Dollars / Hour')
 
         figure_can.get_tk_widget().grid(row=2, column=0, sticky="ew")
 
